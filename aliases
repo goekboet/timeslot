@@ -1,0 +1,1 @@
+alias test='dotnet test bookings.core.tests/bookings.core.tests.csproj'

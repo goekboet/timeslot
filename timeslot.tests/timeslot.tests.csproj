@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\bookings.core\bookings.core.csproj" />
+    <ProjectReference Include="..\timeslot\timeslot.csproj" />
   </ItemGroup>
 
 </Project>

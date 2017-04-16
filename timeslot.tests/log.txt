@@ -1,0 +1,66 @@
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.164, 383473601860743, vstest.console.dll, TestPluginCache: Discovering the extensions using extension path.
+TpTrace Information: 0 : 78984, 1, 2017/04/14, 22:21:05.197, 383473629751400, vstest.console.dll, AssemblyResolver: Microsoft.VisualStudio.TestPlatform.Extensions.TrxLogger: Resolving assembly.
+TpTrace Information: 0 : 78984, 1, 2017/04/14, 22:21:05.200, 383473632831695, vstest.console.dll, AssemblyResolver: Microsoft.VisualStudio.TestPlatform.Extensions.TrxLogger: Resolved assembly. 
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.202, 383473635064826, vstest.console.dll, TestPluginCache: Discovered the extensions using extension path ''.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.203, 383473635191743, vstest.console.dll, TestPluginCache: Discoverers are ''.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.203, 383473635270533, vstest.console.dll, TestPluginCache: Executors are ''.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.203, 383473635342441, vstest.console.dll, TestPluginCache: Setting providers are ''.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.203, 383473635423976, vstest.console.dll, TestPluginCache: Loggers are 'logger://Microsoft/TestPlatform/TrxLogger/v2'.
+TpTrace Information: 0 : 78984, 1, 2017/04/14, 22:21:05.209, 383473641214299, vstest.console.dll, RunTestsArgumentProcessor:Execute: Test run is starting.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.228, 383473660109478, vstest.console.dll, Using effective platform:X86 effective framework:.NETCoreApp,Version=v1.1
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.236, 383473668528566, vstest.console.dll, RunTestsArgumentProcessor:Execute: Queuing Test run.
+TpTrace Information: 0 : 78984, 1, 2017/04/14, 22:21:05.236, 383473668733125, vstest.console.dll, TestRequestManager.RunTests: run tests started.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.240, 383473672523040, vstest.console.dll, TestEngine: Initializing Parallel Execution as MaxCpuCount is set to: 1
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.250, 383473682504817, vstest.console.dll, TestRunRequest.ExecuteAsync: Creating test run request.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.251, 383473683267235, vstest.console.dll, TestRunRequest.ExecuteAsync: Starting.
+TpTrace Information: 0 : 78984, 1, 2017/04/14, 22:21:05.251, 383473683474207, vstest.console.dll, TestRunRequest.ExecuteAsync: Starting run with settings:TestRunCriteria:
+   KeepAlive=False,FrequencyOfRunStatsChangeEvent=10,RunStatsChangeEventTimeout=00:00:01.5000000,TestCaseFilter=,TestExecutorLauncher=
+   Settingsxml=<RunSettings>
+  <RunConfiguration>
+    <ResultsDirectory>/Users/erikgook/Developer/bookings/bookings.core.tests/TestResults</ResultsDirectory>
+    <TargetPlatform>X86</TargetPlatform>
+    <TargetFrameworkVersion>.NETCoreApp,Version=v1.1</TargetFrameworkVersion>
+  </RunConfiguration>
+</RunSettings>
+
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.251, 383473683522857, vstest.console.dll, TestRunRequest.ExecuteAsync: Wait for the first run request is over.
+TpTrace Information: 0 : 78984, 1, 2017/04/14, 22:21:05.252, 383473684865413, vstest.console.dll, TestRunRequest.ExecuteAsync: Started.
+TpTrace Verbose: 0 : 78984, 1, 2017/04/14, 22:21:05.253, 383473685212523, vstest.console.dll, TestRunRequest.WaitForCompletion: Waiting with timeout -1.
+TpTrace Information: 0 : 78984, 5, 2017/04/14, 22:21:05.254, 383473686323405, vstest.console.dll, ProxyParallelExecutionManager: Triggering test run for next source: /Users/erikgook/Developer/bookings/bookings.core.tests/bin/Debug/netcoreapp1.1/bookings.core.tests.dll
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.255, 383473687542342, vstest.console.dll, ProxyExecutionManager: Test host is non shared. Lazy initialize.
+TpTrace Information: 0 : 78984, 5, 2017/04/14, 22:21:05.319, 383473751194314, vstest.console.dll, Listening on port : 54370
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.336, 383473768426507, vstest.console.dll, DotnetTestHostmanager: Full path of dotnet.exe is /usr/local/share/dotnet/dotnet
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.336, 383473768594087, vstest.console.dll, DotnetTestHostmanager: Adding  --runtimeconfig "/Users/erikgook/Developer/bookings/bookings.core.tests/bin/Debug/netcoreapp1.1/bookings.core.tests.runtimeconfig.json" in args
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.336, 383473768671749, vstest.console.dll, DotnetTestHostmanager: Adding  --depsfile "/Users/erikgook/Developer/bookings/bookings.core.tests/bin/Debug/netcoreapp1.1/bookings.core.tests.deps.json" in args
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.339, 383473771368232, vstest.console.dll, DotnetTestHostmanager: Reading file /Users/erikgook/Developer/bookings/bookings.core.tests/bin/Debug/netcoreapp1.1/bookings.core.tests.deps.json to get path of testhost.dll
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.380, 383473812982504, vstest.console.dll, DotnetTestHostmanager: Relative path of testhost.dll with respect to package folder is microsoft.testplatform.testhost/15.0.0/lib/netstandard1.5/testhost.dll
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.384, 383473816362149, vstest.console.dll, DotnetTestHostmanager: Looking for path microsoft.testplatform.testhost/15.0.0/lib/netstandard1.5/testhost.dll in folder /Users/erikgook/.nuget/packages
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.384, 383473816466652, vstest.console.dll, DotnetTestHostmanager: Full path of testhost.dll is /Users/erikgook/.nuget/packages/microsoft.testplatform.testhost/15.0.0/lib/netstandard1.5/testhost.dll
+TpTrace Verbose: 0 : 78984, 5, 2017/04/14, 22:21:05.384, 383473816761408, vstest.console.dll, ProcessHelper: Starting process '/usr/local/share/dotnet/dotnet' with command line 'exec --runtimeconfig "/Users/erikgook/Developer/bookings/bookings.core.tests/bin/Debug/netcoreapp1.1/bookings.core.tests.runtimeconfig.json" --depsfile "/Users/erikgook/Developer/bookings/bookings.core.tests/bin/Debug/netcoreapp1.1/bookings.core.tests.deps.json" "/Users/erikgook/.nuget/packages/microsoft.testplatform.testhost/15.0.0/lib/netstandard1.5/testhost.dll" --port 54370 --parentprocessid 78984 --diag log.host.17-04-14_22-21-05_33162_5.txt'
+TpTrace Information: 0 : 78984, 4, 2017/04/14, 22:21:05.597, 383474029203708, vstest.console.dll, Accepted Client request and set the flag
+TpTrace Verbose: 0 : 78984, 7, 2017/04/14, 22:21:05.792, 383474224229542, vstest.console.dll, TestRunRequest:SendTestRunMessage: Starting.
+TpTrace Information: 0 : 78984, 7, 2017/04/14, 22:21:05.792, 383474224657765, vstest.console.dll, TestRunRequest:SendTestRunMessage: Completed.
+TpTrace Verbose: 0 : 78984, 7, 2017/04/14, 22:21:07.014, 383475446875017, vstest.console.dll, TestRunRequest:SendTestRunMessage: Starting.
+TpTrace Information: 0 : 78984, 7, 2017/04/14, 22:21:07.014, 383475447017837, vstest.console.dll, TestRunRequest:SendTestRunMessage: Completed.
+TpTrace Verbose: 0 : 78984, 7, 2017/04/14, 22:21:07.128, 383475560934088, vstest.console.dll, TestRunRequest:SendTestRunMessage: Starting.
+TpTrace Information: 0 : 78984, 7, 2017/04/14, 22:21:07.128, 383475561035611, vstest.console.dll, TestRunRequest:SendTestRunMessage: Completed.
+TpTrace Verbose: 0 : 78984, 7, 2017/04/14, 22:21:07.212, 383475644957564, vstest.console.dll, TestRunRequest:SendTestRunMessage: Starting.
+TpTrace Information: 0 : 78984, 7, 2017/04/14, 22:21:07.212, 383475645047290, vstest.console.dll, TestRunRequest:SendTestRunMessage: Completed.
+TpTrace Information: 0 : 78984, 4, 2017/04/14, 22:21:08.657, 383477089178678, vstest.console.dll, AssemblyResolver: System.Core: Resolving assembly.
+TpTrace Error: 0 : 78984, 10, 2017/04/14, 22:21:08.665, 383477097305714, vstest.console.dll, Test host exited with error: Process is terminated due to StackOverflowException.
+
+TpTrace Error: 0 : 78984, 4, 2017/04/14, 22:21:08.670, 383477102392592, vstest.console.dll, SocketCommunicationManager ReceiveMessage: failed to receive message System.IO.EndOfStreamException: Unable to read beyond the end of the stream.
+   at System.IO.__Error.EndOfFile()
+   at System.IO.BinaryReader.ReadByte()
+   at System.IO.BinaryReader.Read7BitEncodedInt()
+   at System.IO.BinaryReader.ReadString()
+   at Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.SocketCommunicationManager.TryReceiveRawMessage(CancellationToken cancellationToken)
+TpTrace Error: 0 : 78984, 7, 2017/04/14, 22:21:08.670, 383477102551033, vstest.console.dll, Unable to receive message from testhost: Process is terminated due to StackOverflowException.
+
+TpTrace Error: 0 : 78984, 7, 2017/04/14, 22:21:08.671, 383477103092657, vstest.console.dll, Server: TestExecution: Aborting test run because System.IO.IOException: Process is terminated due to StackOverflowException.
+
+   at Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.TestRequestSender.TryReceiveRawMessage()
+   at Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.TestRequestSender.ListenAndReportTestResults(ITestRunEventsHandler testRunEventsHandler)
+TpTrace Information: 0 : 78984, 7, 2017/04/14, 22:21:08.671, 383477103384757, vstest.console.dll, AssemblyResolver: Microsoft.TestPlatform.CommunicationUtilities.resources: Resolving assembly.
+TpTrace Verbose: 0 : 78984, 7, 2017/04/14, 22:21:08.671, 383477103654142, vstest.console.dll, TestRunRequest:SendTestRunMessage: Starting.
+TpTrace Information: 0 : 78984, 7, 2017/04/14, 22:21:08.671, 383477103720241, vstest.console.dll, TestRunRequest:SendTestRunMessage: Completed.

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bookings.core", "bookings.core\bookings.core.csproj", "{48FA65BE-57DB-4E0F-A9D7-3A9E98FCEF1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "timeslot", "timeslot\timeslot.csproj", "{48FA65BE-57DB-4E0F-A9D7-3A9E98FCEF1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bookings.core.tests", "bookings.core.tests\bookings.core.tests.csproj", "{78B48549-4FA5-431A-A39B-9DCCD8C2E483}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "timeslot.tests", "timeslot.tests\timeslot.tests.csproj", "{78B48549-4FA5-431A-A39B-9DCCD8C2E483}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

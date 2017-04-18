@@ -1,4 +1,4 @@
-dotnet restore && dotnet build
+`dotnet restore && dotnet build`
 
 run test suite with `dotnet test`
 

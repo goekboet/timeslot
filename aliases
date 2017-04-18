@@ -1,1 +1,1 @@
-alias test='dotnet test bookings.core.tests/bookings.core.tests.csproj'
+alias test='dotnet test timeslot.tests/timeslot.tests.csproj'

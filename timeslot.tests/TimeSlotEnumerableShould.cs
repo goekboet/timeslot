@@ -10,11 +10,7 @@ namespace timeslot.tests
     public class MultipliersShould
     {
         private static Func<(TimeSpan open, TimeSpan dur)> referenceSlot01h01h = () => (TimeSpan.FromHours(1), TimeSpan.FromHours(1));
-        private static Func<(TimeSpan open, TimeSpan dur), IEnumerable<(TimeSpan, TimeSpan)>> NoOverlap = s =>
-            Enumerable.Range(1, 1)
-                .Select(x => (s.open.Add(TimeSpan.FromHours(-x - 1)), s.dur))
-                .Concat(Enumerable.Range(1, 1)
-                .Select(x => (s.open.Add(s.dur.Add(TimeSpan.FromHours(x))), s.dur)));
+        private static Func<(TimeSpan, TimeSpan),(TimeSpan, TimeSpan), ((TimeSpan, TimeSpan) e,(TimeSpan, TimeSpan) r)> Pairwise = (e, r) => (e: e, r: r);
 
         [Fact]
         public void Split_By_2()
@@ -34,51 +30,69 @@ namespace timeslot.tests
         }
 
         [Fact]
-        public void Subtract_non_overlapping()
+        public void Subtract_distinct_terms()
         {
-            var minuend = referenceSlot01h01h();
-            var subtrahends = new[] {
-                (minuend.open.Subtract(Minutes(20)), Minutes(10)),
-                (minuend.open.Subtract(Minutes(10)), Minutes(10)),
-                (End(minuend), Minutes(10)),
-                (End(minuend).Add(Minutes(10)), Minutes(10))
+            var firstTerm = referenceSlot01h01h();
+            var secondTerms = new[] {
+                (firstTerm.open.Subtract(Minutes(20)), Minutes(10)),
+                (firstTerm.open.Subtract(Minutes(10)), Minutes(10)),
+                (End(firstTerm), Minutes(10)),
+                (End(firstTerm).Add(Minutes(10)), Minutes(10))
             };
 
-            Assert.All(subtrahends, o => Assert.Equal(Show(minuend), Show(Minus(minuend, o).SingleOrDefault())));
+            Assert.All(secondTerms, o => Assert.Equal(Show(firstTerm), Show(Difference(firstTerm, o).Single())));
         }
 
         [Fact]
-        public void Subtract_overlapping()
+        public void Union_distinct_terms()
         {
-            var minuend = referenceSlot01h01h();
-            var subtrahends = new[]
-            {
-                (minuend.open.Subtract(Minutes(10)), Minutes(20)),
-                (End(minuend).Subtract(Minutes(10)), Minutes(20))
-            };
-            var expected = new[]
-            {
-                (minuend.open.Add(Minutes(10)), minuend.dur.Subtract(Minutes(10))),
-                (minuend.open, minuend.dur.Subtract(Minutes(10)))
+            var firstTerm = (Minutes(30), Minutes(20));
+            var secondTerm = (Minutes(60), Minutes(20));
+            var expect = new [] 
+            { 
+                (Minutes(60), Minutes(20)),
+                (Minutes(30), Minutes(20))
             };
 
-            Assert.All(
-                subtrahends.Zip(expected, (a, e) => new { arg = a, expected = e }),
-                x => Assert.Equal(Show(x.expected), Show(Minus(minuend, x.arg).Single())));
+            var result = Union(firstTerm, secondTerm);
+
+            Assert.Equal(expect.Count(), result.Count());
+            Assert.All(expect.Zip(result, Pairwise), x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
         [Fact]
-        public void Subtract_proper_subset_subtrahend_of_minuend()
+        public void Subtract_terms_intersect()
         {
-            var minuend = referenceSlot01h01h();
-            var subtrahend = (minuend.open.Add(Minutes(20)), Minutes(20));
+            var firstTerm = (Minutes(60), Minutes(60));
+            var secondTerms = new[]
+            {
+                (Minutes(50), Minutes(20)),
+                (Minutes(110), Minutes(20)),
+            };
             var expected = new[]
             {
-                (minuend.open.Add(Minutes(40)), Minutes(20)),
-                (minuend.open, Minutes(20))
+                (Minutes(70), Minutes(50)),
+                (Minutes(60), Minutes(50))
             };
 
-            var result = Minus(minuend, subtrahend);
+            var result = secondTerms.SelectMany(x => Difference(firstTerm, x));
+
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.All(expected.Zip(result, Pairwise), x => Assert.Equal(Show(x.e), Show(x.r)));
+        }
+
+        [Fact]
+        public void Subtract_second_term_is_proper_subset_of_the_first()
+        {
+            var firstTerm = referenceSlot01h01h();
+            var secondTerm = (firstTerm.open.Add(Minutes(20)), Minutes(20));
+            var expected = new[]
+            {
+                (firstTerm.open.Add(Minutes(40)), Minutes(20)),
+                (firstTerm.open, Minutes(20))
+            };
+
+            var result = Difference(firstTerm, secondTerm);
 
             Assert.Equal(2, result.Count());
             Assert.All(
@@ -87,65 +101,65 @@ namespace timeslot.tests
         }
 
         [Fact]
-        public void Subtract_proper_subset_minuend_of_subtrahend()
+        public void Subtract_first_term_is_proper_subset_of_the_second()
         {
-            var minuend = referenceSlot01h01h();
-            var subtrahend = (minuend.open.Subtract(Minutes(10)), minuend.dur.Add(Minutes(20)));
+            var firstTerm = referenceSlot01h01h();
+            var secondTerm = (firstTerm.open.Subtract(Minutes(10)), firstTerm.dur.Add(Minutes(20)));
 
-            Assert.Empty(Minus(minuend, subtrahend));
+            Assert.Empty(Difference(firstTerm, secondTerm));
         }
 
         [Fact]
-        public void Subtract_equal()
+        public void Subtract_equal_terms()
         {
-            var minuend = referenceSlot01h01h();
-            var subtrahend = referenceSlot01h01h();
+            var firstTerm = referenceSlot01h01h();
+            var secondTerm = referenceSlot01h01h();
 
-            Assert.Empty(Minus(minuend, subtrahend));
+            Assert.Empty(Difference(firstTerm, secondTerm));
         }
 
         [Fact]
-        public void Minus_subtrahend_aligned_with_end_of_minuend()
+        public void Difference_terms_are_successors()
         {
-            var minuend = (Minutes(60), Minutes(30));
-            var subtrahend = (Minutes(80), Minutes(10));
+            var firstTerm = (Minutes(60), Minutes(30));
+            var secondTerm = (Minutes(80), Minutes(10));
             var expected = new[] {(Minutes(60), Minutes(20))};
 
-            var result = Minus(minuend, subtrahend);
+            var result = Difference(firstTerm, secondTerm);
 
             Assert.Equal(ShowSlots(expected), ShowSlots(result));
         }
 
         [Fact]
-        public void Minus_subtrahend_aligned_with_start_of_minuend()
+        public void Difference_terms_share_open_TimeSpan()
         {
-            var minuend = (Minutes(60), Minutes(30));
-            var subtrahend = (Minutes(60), Minutes(10));
+            var firstTerm = (Minutes(60), Minutes(30));
+            var secondTerm = (Minutes(60), Minutes(10));
             var expected = new[] {(Minutes(70), Minutes(20))};
 
-            var result = Minus(minuend, subtrahend);
+            var result = Difference(firstTerm, secondTerm);
 
             Assert.Equal(ShowSlots(expected), ShowSlots(result));
         }
 
         [Theory]
         [MemberData(nameof(Empty_or_null))]
-        public void Minus_returns_empty_on_emty_or_null_minuend(
+        public void Difference_returns_empty_on_emty_or_null_first_term(
             (TimeSpan, TimeSpan)[] ms,
             (TimeSpan, TimeSpan)[] ds)
         {
-            var result = Minus(ms, ds);
+            var result = Difference(ms, ds);
             Assert.Empty(result);
         }
 
         [Theory]
-        [MemberData(nameof(Minus))]
-        public void Minus_returns_correct_result(
-            (TimeSpan, TimeSpan)[] ms,
-            (TimeSpan, TimeSpan)[] ds,
+        [MemberData(nameof(Difference))]
+        public void Difference_returns_correct_result(
+            (TimeSpan, TimeSpan)[] fs,
+            (TimeSpan, TimeSpan)[] ss,
             (TimeSpan, TimeSpan)[] es)
         {
-            var result = Minus(ms, ds);
+            var result = Difference(fs, ss);
 
             Assert.True(es.Count() == result.Count(), ShowSlots(result));
             Assert.All(
@@ -153,35 +167,36 @@ namespace timeslot.tests
                 x => Assert.Equal(Show(x.expected), Show(x.result)));
         }
 
-        public static IEnumerable<object[]> Minus
+
+        public static IEnumerable<object[]> Difference
         {
             get
             {
-                yield return new[]
+                yield return new[] //Empty second term
                 {
                     new[] {(Hours(1), Minutes(30))},
                     Empty,
                     new[] {(Hours(1), Minutes(30))}
                 };
-                yield return new[]
+                yield return new[] //Disjunct terms
                 {
                     new []{(Hours(1), Minutes(30))},
                     new []{(Minutes(30), Minutes(30))},
                     new []{(Hours(1), Minutes(30))}
                 };
-                yield return new[]
+                yield return new[] //terms intersect to the left
                 {
                     new []{(Hours(1), Minutes(30))},
                     new []{(Minutes(40), Minutes(30))},
                     new []{(Minutes(70), Minutes(20))}
                 };
-                yield return new[]
+                yield return new[] //terms share open timespan
                 {
                     new []{(Hours(1), Minutes(30))},
                     new []{(Hours(1), Minutes(10))},
                     new []{(Minutes(70), Minutes(20))}
                 };
-                yield return new[]
+                yield return new[] //second term is proper subset of the first
                 {
                     new []{(Hours(1), Minutes(30))},
                     new []{(Minutes(70), Minutes(10))},
@@ -191,25 +206,25 @@ namespace timeslot.tests
                         (Minutes(60), Minutes(10))
                     }
                 };
-                yield return new[]
+                yield return new[] // terms intersect to the right
                 {
                     new []{(Minutes(60), Minutes(30))},
                     new []{(Minutes(80), Minutes(10))},
                     new []{(Minutes(60), Minutes(20))}
                 };
-                yield return new[]
+                yield return new[] // terms share end
                 {
                     new []{(Minutes(60), Minutes(30))},
                     new []{(Minutes(90), Minutes(10))},
                     new []{(Minutes(60), Minutes(30))}
                 };
-                yield return new[]
+                yield return new[] // terms are disjunct second term follows first
                 {
                     new []{(Minutes(60), Minutes(30))},
                     new []{(Minutes(100), Minutes(10))},
                     new []{(Minutes(60), Minutes(30))}
                 };
-                yield return new[]
+                yield return new[] // first and second term map sequentially
                 {
                     new[]
                     {
@@ -227,7 +242,7 @@ namespace timeslot.tests
                         (Minutes(70), Minutes(20))
                     }
                 };
-                yield return new[]
+                yield return new[] // first first term apply to the first two second terms. last second term disjunct
                 {
                     new[]
                     {
@@ -245,7 +260,7 @@ namespace timeslot.tests
                         (Minutes(70), Minutes(10))
                     }
                 };
-                yield return new[]
+                yield return new[] //first first term applies to first second term. Second first term applies to second and third second term.
                 {
                     new[]
                     {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static timeslot.TimeSlot;
+using static timeslot.Overlap;
 
 namespace timeslot
 {
@@ -37,41 +38,45 @@ namespace timeslot
                 (dividend.open, quotient)).ToArray();
         }
         /// <summary>
-        /// Applies minus to a list of timeslots and another list of timeslots. The result
+        /// Applies Difference to a list of timeslots and another list of timeslots. The result
         /// is the set difference of the time that is open between the first list and the second.
         /// </summary>
         /// <param name="o">open</param>
         /// <param name="d">duration</param>
-        public static IEnumerable<(TimeSpan o, TimeSpan d)> Minus(
-            IEnumerable<(TimeSpan o, TimeSpan d)> min,
-            IEnumerable<(TimeSpan o, TimeSpan d)> sub)
+        public static IEnumerable<(TimeSpan o, TimeSpan d)> Difference(
+            IEnumerable<(TimeSpan o, TimeSpan d)> fst,
+            IEnumerable<(TimeSpan o, TimeSpan d)> snd)
         {
             Func<(TimeSpan o, TimeSpan), bool> before(
-                (TimeSpan o, TimeSpan) fst) => snd => fst.o < snd.o;
+                (TimeSpan o, TimeSpan) a) => b => a.o < b.o;
 
-            if (min == null || !min.Any()) return Empty;
-            if (sub == null || !sub.Any()) return min;
+            if (fst == null || !fst.Any()) return Empty;
+            if (snd == null || !snd.Any()) return fst;
 
-            var s = sub.First();
-            var m = min.TakeWhile(x => x.o < End(s));
-            var r = m.SelectMany(x => Minus(x ,s));
+            var s = snd.First();
+            var m = fst.TakeWhile(x => x.o < End(s));
+            var r = m.SelectMany(x => Difference(x ,s));
 
             var computed = r.TakeWhile(before(s));
             var remainder = r.SkipWhile(before(s));
 
             return computed
-                .Concat(Minus(
-                    min: remainder.Concat(min.Skip(m.Count())), 
-                    sub: sub.Skip(1))); 
+                .Concat(Difference(
+                    fst: remainder.Concat(fst.Skip(m.Count())), 
+                    snd: snd.Skip(1))); 
         }
         /// <summary>
-        /// Applies minus to one timeslot and another. The result is the set difference 
-        /// of the time considered open in the two timeslots. The result will be a list of
-        /// timeslots of zero to two elements.
+        /// The difference between the first timeslot and a second. 
+        /// The result is the time considered open in first but not the second. 
+        /// The result will be a list of timeslots of zero to two elements.
         /// </summary>
-        /// <param name="o"></param>
+        /// <param name="o">open</param>
+        /// <param name="d">duration</param>
+        /// <param name="m"></param>
         /// <param name="d"></param>
-        public static (TimeSpan o, TimeSpan d)[] Minus(
+        /// </summary>
+       
+        public static (TimeSpan o, TimeSpan d)[] Difference(
             (TimeSpan o, TimeSpan d) min,
             (TimeSpan o, TimeSpan d) sub)
         {
@@ -93,6 +98,20 @@ namespace timeslot
                     }.Where(x => x.Item2 > Zero).ToArray();
 
             return Empty;
+        }
+
+        public static IEnumerable<(TimeSpan o, TimeSpan d)> Union(
+            (TimeSpan o, TimeSpan d) fst,
+            (TimeSpan o, TimeSpan d) snd)
+        {
+            switch (ClassifyOverlap(fst, snd))
+            {
+                case None:
+                    return new [] { fst, snd }.OrderByDescending(x => x.o);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
         }
     }
 }

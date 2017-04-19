@@ -33,20 +33,20 @@ namespace timeslot
         /// <param name="o">open</param>
         /// <param name="d">duration</param>
         /// <returns>A classification</returns>
-        public static Overlap ClassifyOverlap(
+        public static Overlap Overlap(
             (TimeSpan o, TimeSpan d) fst,
             (TimeSpan o, TimeSpan d) snd)
         {
             if (End(fst) < snd.o ||
                 End(snd) < fst.o)
-                return Overlap.None;
+                return timeslot.Overlap.None;
             if (fst.o <= snd.o && End(fst) < End(snd) ||
                 snd.o <= fst.o && End(snd) < End(fst))
-                return Overlap.Intersect;
+                return timeslot.Overlap.Intersect;
             if (fst.o == snd.o && fst.d == snd.d)
-                return Overlap.Equal;
+                return timeslot.Overlap.Equal;
 
-            return Overlap.ProperSubset;
+            return timeslot.Overlap.ProperSubset;
         }
         /// <summary>
         /// TimeSpan convenience
@@ -74,6 +74,10 @@ namespace timeslot
         /// <param name="o">open</param>
         /// <param name="d">duration</param>
         /// <returns>a string representation of the timeslot</returns>
+        
+        public static TimeSpan Min(TimeSpan fst, TimeSpan snd) => fst < snd ? fst : snd;
+
+        public static TimeSpan Max(TimeSpan fst, TimeSpan snd) => fst > snd ? fst : snd;
         public static string Show(
             (TimeSpan o, TimeSpan d) span)
         {

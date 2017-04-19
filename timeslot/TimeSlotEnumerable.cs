@@ -55,15 +55,15 @@ namespace timeslot
 
             var s = snd.First();
             var m = fst.TakeWhile(x => x.o < End(s));
-            var r = m.SelectMany(x => Difference(x ,s));
+            var r = m.SelectMany(x => Difference(x, s));
 
             var computed = r.TakeWhile(before(s));
             var remainder = r.SkipWhile(before(s));
 
             return computed
                 .Concat(Difference(
-                    fst: remainder.Concat(fst.Skip(m.Count())), 
-                    snd: snd.Skip(1))); 
+                    fst: remainder.Concat(fst.Skip(m.Count())),
+                    snd: snd.Skip(1)));
         }
         /// <summary>
         /// The difference between the first timeslot and a second. 
@@ -75,43 +75,51 @@ namespace timeslot
         /// <param name="m"></param>
         /// <param name="d"></param>
         /// </summary>
-       
+
         public static (TimeSpan o, TimeSpan d)[] Difference(
             (TimeSpan o, TimeSpan d) min,
             (TimeSpan o, TimeSpan d) sub)
         {
-            var overlap = ClassifyOverlap(min, sub);
-
-            if (overlap == Overlap.None)
-                return new[] { min };
-            if (overlap == Overlap.Intersect)
-                return min.o < sub.o
-                    ? new[] { (min.o, sub.o.Subtract(min.o)) }
-                    : new[] { (End(sub), End(min).Subtract(End(sub))) };
-            if (overlap == Overlap.ProperSubset)
-                return sub.o < min.o
-                    ? Empty
-                    : new[]
-                    {
-                        (End(sub), End(min).Subtract(End(sub))),
-                        (min.o, sub.o.Subtract(min.o))
-                    }.Where(x => x.Item2 > Zero).ToArray();
-
-            return Empty;
+            switch (Overlap(min, sub))
+            {
+                case Equal:
+                    return Empty;
+                case None:
+                    return new[] { min };
+                case Intersect:
+                    return min.o < sub.o
+                        ? new[] { (min.o, sub.o.Subtract(min.o)) }
+                        : new[] { (End(sub), End(min).Subtract(End(sub))) };
+                case ProperSubset:
+                    return sub.o < min.o
+                        ? Empty
+                        : new[]
+                        {
+                            (End(sub), End(min).Subtract(End(sub))),
+                            (min.o, sub.o.Subtract(min.o))
+                        }.Where(x => x.Item2 > Zero).ToArray();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public static IEnumerable<(TimeSpan o, TimeSpan d)> Union(
             (TimeSpan o, TimeSpan d) fst,
             (TimeSpan o, TimeSpan d) snd)
         {
-            switch (ClassifyOverlap(fst, snd))
+            switch (Overlap(fst, snd))
             {
+                case Equal:
+                    return new[] { fst };
                 case None:
-                    return new [] { fst, snd }.OrderByDescending(x => x.o);
+                    return new[] { fst, snd }.OrderByDescending(x => x.o);
+                case Intersect:
+                    return new[] { (Min(fst.o, snd.o), Max(End(fst), End(snd)).Subtract(Min(fst.o, snd.o))) };
+                case ProperSubset:
+                    return new[] { (Min(fst.o, snd.o), Max(fst.d, snd.d))};
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
         }
     }
 }

@@ -23,7 +23,7 @@ namespace timeslot.tests
             var businessHours = referenceSlot01h01h();
             var overlaps = NoOverlap(businessHours);
 
-            Assert.All(overlaps, x => Assert.True(ClassifyOverlap(x, businessHours).Equals(None)));
+            Assert.All(overlaps, x => Assert.True(Overlap(x, businessHours).Equals(None)));
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace timeslot.tests
             var first = referenceSlot01h01h();
             var second = referenceSlot01h01h();
 
-            Assert.True(ClassifyOverlap(first, second).Equals(Equal));
+            Assert.True(Overlap(first, second).Equals(Equal));
         }
 
         [Fact]
@@ -49,8 +49,8 @@ namespace timeslot.tests
 
             Assert.All(overlaps, o =>
                 Assert.True(
-                    ClassifyOverlap(o, businesHours).Equals(Intersect),
-                    $"Should be partial was {ClassifyOverlap(o, businesHours)}"));
+                    Overlap(o, businesHours).Equals(Intersect),
+                    $"Should be partial was {Overlap(o, businesHours)}"));
         }
 
         [Fact]
@@ -67,8 +67,8 @@ namespace timeslot.tests
 
             Assert.All(overlaps, o =>
                 Assert.True(
-                    ClassifyOverlap(o, businessHours).Equals(ProperSubset),
-                    $"Should be ProperSubset was {ClassifyOverlap(o, businessHours)}"));
+                    Overlap(o, businessHours).Equals(ProperSubset),
+                    $"Should be ProperSubset was {Overlap(o, businessHours)}"));
         }
     }
     

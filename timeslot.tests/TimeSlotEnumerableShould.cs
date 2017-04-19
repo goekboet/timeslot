@@ -69,7 +69,7 @@ namespace timeslot.tests
                 (Minutes(50), Minutes(20)),
                 (Minutes(110), Minutes(20)),
             };
-            var expected = new[]
+            var expected = new[]    
             {
                 (Minutes(70), Minutes(50)),
                 (Minutes(60), Minutes(50))
@@ -82,14 +82,32 @@ namespace timeslot.tests
         }
 
         [Fact]
+        public void Union_terms_intersect()
+        {
+            var terms = new[] 
+            {
+                (Minutes(50), Minutes(20)),
+                (Minutes(60), Minutes(20))
+            };
+
+            var expected = (Minutes(50), Minutes(30));
+            var results = Union(terms[0], terms[1])
+                .Concat(Union(terms[1], terms[0]))
+                .ToArray();
+            
+            Assert.Equal(Show(results[0]), Show(results[1]));
+            Assert.Equal(Show(expected), Show(results[0]));
+        }
+
+        [Fact]
         public void Subtract_second_term_is_proper_subset_of_the_first()
         {
-            var firstTerm = referenceSlot01h01h();
-            var secondTerm = (firstTerm.open.Add(Minutes(20)), Minutes(20));
+            var firstTerm = (Minutes(60), Minutes(60));
+            var secondTerm = (Minutes(80), Minutes(20));
             var expected = new[]
             {
-                (firstTerm.open.Add(Minutes(40)), Minutes(20)),
-                (firstTerm.open, Minutes(20))
+                (Minutes(100), Minutes(20)),
+                (Minutes(60), Minutes(20))
             };
 
             var result = Difference(firstTerm, secondTerm);
@@ -98,6 +116,61 @@ namespace timeslot.tests
             Assert.All(
                 result.Zip(expected, (r, e) => new { result = r, expected = e }),
                 x => Assert.Equal(Show(x.expected), Show(x.result)));
+        }
+
+        [Fact]
+        public void Union_one_term_is_proper_subset_of_the_other()
+        {
+            var terms = new[] 
+            {
+                (Minutes(60), Minutes(30)), 
+                (Minutes(70), Minutes(10))
+            };
+            var expected = (Minutes(60), Minutes(30));
+
+            var result = Union(terms[0], terms[1])
+                    .Concat(Union(terms[1], terms[0]))
+                    .ToArray();
+                
+
+            Assert.Equal(Show(result[0]), Show(result[1]));
+            Assert.Equal(Show(expected), Show(result[0]));
+        }
+
+        [Fact]
+        public void Union_terms_are_continous()
+        {
+            var terms = new[]
+            {
+                (Minutes(60), Minutes(20)),
+                (Minutes(80), Minutes(40))
+            };
+            var expected = (Minutes(60), Minutes(60));
+
+            var result = Union(terms[0], terms[1])
+                .Concat(Union(terms[1], terms[0]))
+                .ToArray();
+
+            Assert.Equal(Show(result[0]), Show(result[1]));
+            Assert.Equal(Show(expected), Show(result[0]));
+        }
+
+        [Fact]
+        public void Union_terms_are_equal()
+        {
+            var terms = new[] 
+            {
+                (Minutes(60), Minutes(60)),
+                (Minutes(60), Minutes(60))
+            };
+            var expected = (Minutes(60), Minutes(60));
+
+            var result = Union(terms[0], terms[1])
+                .Concat(Union(terms[1], terms[0]))
+                .ToArray();
+
+            Assert.Equal(Show(result[0]), Show(result[1]));
+            Assert.Equal(Show(expected), Show(result[0]));
         }
 
         [Fact]

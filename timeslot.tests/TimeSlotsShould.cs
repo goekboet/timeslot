@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 using static timeslot.TimeSlot;
 using static timeslot.Overlap;
@@ -9,29 +7,25 @@ namespace timeslot.tests
 {
     public class TimeSlotShould
     {
-        public static Func<(TimeSpan open, TimeSpan dur)> referenceSlot01h01h = () => (TimeSpan.FromHours(1), TimeSpan.FromHours(1));
-
-        private static Func<(TimeSpan open, TimeSpan dur), IEnumerable<(TimeSpan, TimeSpan)>> NoOverlap = s =>
-            Enumerable.Range(1, 1)
-                .Select(x => (s.open.Add(TimeSpan.FromHours(-x - 1)), s.dur))
-                .Concat(Enumerable.Range(1, 1)
-                .Select(x => (s.open.Add(s.dur.Add(TimeSpan.FromHours(x))), s.dur)));
-                
         [Fact]
         public void Classify_overlap_as_None()
         {
-            var businessHours = referenceSlot01h01h();
-            var overlaps = NoOverlap(businessHours);
+            var timeSlot = (Minutes(60), Minutes(60));
+            var overlaps = new [] 
+            {
+                (Minutes(40), Minutes(10)),
+                (Minutes(130), Minutes(10))
+            };
 
-            Assert.All(overlaps, x => Assert.True(Overlap(x, businessHours).Equals(None)));
+            Assert.All(overlaps, x => Assert.True(Overlap(x, timeSlot).Equals(None)));
         }
 
         [Fact]
         public void Classify_overlap_as_Equal()
         {
 
-            var first = referenceSlot01h01h();
-            var second = referenceSlot01h01h();
+            var first = (Minutes(60), Minutes(60));
+            var second = (Minutes(60), Minutes(60));
 
             Assert.True(Overlap(first, second).Equals(Equal));
         }
@@ -39,7 +33,7 @@ namespace timeslot.tests
         [Fact]
         public void Classify_overlap_as_Partial()
         {
-            var businesHours = referenceSlot01h01h();
+            var businesHours = (Minutes(60), Minutes(60));
             var (start, dur) = businesHours;
             var overlaps = new[]
             {
@@ -56,7 +50,7 @@ namespace timeslot.tests
         [Fact]
         public void Classify_overlap_as_propersubset()
         {
-            var businessHours = referenceSlot01h01h();
+            var businessHours = (Minutes(60), Minutes(60));
             var (open, dur) = businessHours;
 
             var overlaps = new[]

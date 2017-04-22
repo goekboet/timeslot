@@ -7,7 +7,7 @@ using static timeslot.TimeSlotEnumerable;
 
 namespace timeslot.tests
 {
-    public class MultipliersShould
+    public class TimeSlotEnumerableShould
     {
         private static Func<(TimeSpan open, TimeSpan dur)> referenceSlot01h01h = () => (TimeSpan.FromHours(1), TimeSpan.FromHours(1));
         private static Func<(TimeSpan, TimeSpan),(TimeSpan, TimeSpan), ((TimeSpan, TimeSpan) e,(TimeSpan, TimeSpan) r)> Pairwise = (e, r) => (e: e, r: r);
@@ -15,29 +15,29 @@ namespace timeslot.tests
         [Fact]
         public void Split_By_2()
         {
-            var hours = referenceSlot01h01h();
+            var hours = (Minutes(60), Minutes(60));
             var result = Split(hours, 2);
-            var half = hours.dur.Subtract(Minutes(30));
+
             var expected = new[] {
-                (hours.open, half),
-                (hours.open.Add(half), half)
+                (Minutes(60), Minutes(30)),
+                (Minutes(90), Minutes(30))
             };
 
             Assert.Equal(result.Length, 2);
             Assert.All(
-                result.Zip(expected, (r, e) => (result: Show(r), expected: Show(e))),
-                x => Assert.Equal(x.expected, x.result));
+                expected.Zip(result, Pairwise),
+                x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
         [Fact]
         public void Subtract_distinct_terms()
         {
-            var firstTerm = referenceSlot01h01h();
+            var firstTerm = (Minutes(60), Minutes(60));
             var secondTerms = new[] {
-                (firstTerm.open.Subtract(Minutes(20)), Minutes(10)),
-                (firstTerm.open.Subtract(Minutes(10)), Minutes(10)),
-                (End(firstTerm), Minutes(10)),
-                (End(firstTerm).Add(Minutes(10)), Minutes(10))
+                (Minutes(40), Minutes(10)),
+                (Minutes(50), Minutes(10)),
+                (Minutes(120), Minutes(10)),
+                (Minutes(130), Minutes(10))
             };
 
             Assert.All(secondTerms, o => Assert.Equal(Show(firstTerm), Show(Difference(firstTerm, o).Single())));
@@ -50,8 +50,8 @@ namespace timeslot.tests
             var secondTerm = (Minutes(60), Minutes(20));
             var expect = new [] 
             { 
-                (Minutes(60), Minutes(20)),
-                (Minutes(30), Minutes(20))
+                (Minutes(30), Minutes(20)),
+                (Minutes(60), Minutes(20))
             };
 
             var result = Union(firstTerm, secondTerm);
@@ -106,8 +106,8 @@ namespace timeslot.tests
             var secondTerm = (Minutes(80), Minutes(20));
             var expected = new[]
             {
-                (Minutes(100), Minutes(20)),
-                (Minutes(60), Minutes(20))
+                (Minutes(60), Minutes(20)),
+                (Minutes(100), Minutes(20))
             };
 
             var result = Difference(firstTerm, secondTerm);
@@ -176,8 +176,8 @@ namespace timeslot.tests
         [Fact]
         public void Subtract_first_term_is_proper_subset_of_the_second()
         {
-            var firstTerm = referenceSlot01h01h();
-            var secondTerm = (firstTerm.open.Subtract(Minutes(10)), firstTerm.dur.Add(Minutes(20)));
+            var firstTerm = (Minutes(60), Minutes(60));
+            var secondTerm = (Minutes(50), Minutes(80));
 
             Assert.Empty(Difference(firstTerm, secondTerm));
         }
@@ -185,8 +185,8 @@ namespace timeslot.tests
         [Fact]
         public void Subtract_equal_terms()
         {
-            var firstTerm = referenceSlot01h01h();
-            var secondTerm = referenceSlot01h01h();
+            var firstTerm = (Minutes(60), Minutes(60));
+            var secondTerm = (Minutes(60), Minutes(60));
 
             Assert.Empty(Difference(firstTerm, secondTerm));
         }
@@ -236,10 +236,25 @@ namespace timeslot.tests
 
             Assert.True(es.Count() == result.Count(), ShowSlots(result));
             Assert.All(
-                result.Zip(es, (r, e) => (expected: e, result: r)),
-                x => Assert.Equal(Show(x.expected), Show(x.result)));
+                es.Zip(result, Pairwise),
+                x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
+        // [Theory]
+        // [MemberData(nameof(Union))]
+        // public void Union_returns_correct_result(
+        //     (TimeSpan, TimeSpan)[] fsts,
+        //     (TimeSpan, TimeSpan)[] snds,
+        //     (TimeSpan, TimeSpan)[] exps
+        // )
+        // {
+        //     var result = Union(fsts, snds);
+
+        //     Assert.True(exps.Count() == result.Count(), ShowSlots(result));
+        //     Assert.All(
+        //         exps.Zip(result, Pairwise), 
+        //         x => Assert.Equal(Show(x.e), Show(x.r)));
+        // }
 
         public static IEnumerable<object[]> Difference
         {
@@ -251,17 +266,169 @@ namespace timeslot.tests
                     Empty,
                     new[] {(Hours(1), Minutes(30))}
                 };
-                yield return new[] //Disjunct terms
+                yield return new[] //fst before and disjunct from snd
                 {
-                    new []{(Hours(1), Minutes(30))},
-                    new []{(Minutes(30), Minutes(30))},
-                    new []{(Hours(1), Minutes(30))}
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10))
+                    },
+                    new[] 
+                    {
+                        (Minutes(110), Minutes(10))
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10))
+                    }
                 };
-                yield return new[] //terms intersect to the left
+                yield return new[] //fst after and disjunct from snd
                 {
-                    new []{(Hours(1), Minutes(30))},
-                    new []{(Minutes(40), Minutes(30))},
-                    new []{(Minutes(70), Minutes(20))}
+                    new[] 
+                    {
+                        (Minutes(110), Minutes(10))
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10))
+                    },
+                    new[] 
+                    {
+                        (Minutes(110), Minutes(10))
+                    },
+                };
+                yield return new[] //fst preceded and followed by distinct snd
+                {
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(90), Minutes(10))
+                    },
+                    new[] 
+                    {
+                        (Minutes(70), Minutes(10)),
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(90), Minutes(10))
+                    }
+                };
+                yield return new[] //fst preceded and followed by distinct snd
+                {
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(20)),
+                        (Minutes(80), Minutes(20))
+                    },
+                    new[] 
+                    {
+                        (Minutes(60), Minutes(30)),
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(90), Minutes(10))
+                    }
+                };
+                yield return new[] 
+                {
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(20)), //overlap snd from left
+                        (Minutes(80), Minutes(10)), //proper subset of snd
+                        (Minutes(100), Minutes(20)) //overlap snd from right
+                    },
+                    new[] 
+                    {
+                        (Minutes(60), Minutes(50)),
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(110), Minutes(10))
+                    }
+                };
+                yield return new[] 
+                {
+                    new[] 
+                    {
+                        (Minutes(60), Minutes(30)), 
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(20)), //overlap fst from left
+                        (Minutes(80), Minutes(20)) //overlap fst from right
+                    },
+                    new[] 
+                    {
+                        (Minutes(70), Minutes(10)),
+                    }
+                };
+                yield return new[] 
+                {
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(80), Minutes(30)),
+                        (Minutes(130), Minutes(10))
+                    },
+                    new[] 
+                    {
+                        (Minutes(70), Minutes(20)), //overlap fst from left
+                        (Minutes(100), Minutes(20)) //overlap fst from right
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(90), Minutes(10)),
+                        (Minutes(130), Minutes(10))
+                    }
+                };
+                yield return new[] 
+                {
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(20)),
+                        (Minutes(80), Minutes(30)),
+                        (Minutes(120), Minutes(20))
+                    },
+                    new[] 
+                    {
+                        (Minutes(60), Minutes(30)), //overlap fst from left
+                        (Minutes(100), Minutes(30)) //overlap fst from right
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(90), Minutes(10)),
+                        (Minutes(130), Minutes(10))
+                    }
+                };
+                yield return new[] 
+                {
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(70))
+                    },
+                    new[] 
+                    {
+                        (Minutes(60), Minutes(10)), 
+                        (Minutes(80), Minutes(10)),
+                        (Minutes(100), Minutes(10))
+                    },
+                    new[] 
+                    {
+                        (Minutes(50), Minutes(10)),
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10)),
+                        (Minutes(110), Minutes(10))
+                    }
                 };
                 yield return new[] //terms share open timespan
                 {
@@ -269,91 +436,145 @@ namespace timeslot.tests
                     new []{(Hours(1), Minutes(10))},
                     new []{(Minutes(70), Minutes(20))}
                 };
-                yield return new[] //second term is proper subset of the first
-                {
-                    new []{(Hours(1), Minutes(30))},
-                    new []{(Minutes(70), Minutes(10))},
-                    new []
-                    {
-                        (Minutes(80), Minutes(10)),
-                        (Minutes(60), Minutes(10))
-                    }
-                };
-                yield return new[] // terms intersect to the right
+                yield return new[] // terms share end
                 {
                     new []{(Minutes(60), Minutes(30))},
                     new []{(Minutes(80), Minutes(10))},
                     new []{(Minutes(60), Minutes(20))}
                 };
-                yield return new[] // terms share end
-                {
-                    new []{(Minutes(60), Minutes(30))},
-                    new []{(Minutes(90), Minutes(10))},
-                    new []{(Minutes(60), Minutes(30))}
-                };
-                yield return new[] // terms are disjunct second term follows first
-                {
-                    new []{(Minutes(60), Minutes(30))},
-                    new []{(Minutes(100), Minutes(10))},
-                    new []{(Minutes(60), Minutes(30))}
-                };
-                yield return new[] // first and second term map sequentially
+                yield return new[]
                 {
                     new[]
                     {
-                        (Minutes(90), Minutes(30)),
-                        (Minutes(60), Minutes(30))
+                        (Minutes(60), Minutes(60))
                     },
                     new[]
                     {
+                        (Minutes(70), Minutes(10)),
                         (Minutes(90), Minutes(10)),
-                        (Minutes(60), Minutes(10))
+                        (Minutes(110), Minutes(10))
                     },
                     new[]
                     {
-                        (Minutes(100), Minutes(20)),
-                        (Minutes(70), Minutes(20))
-                    }
-                };
-                yield return new[] // first first term apply to the first two second terms. last second term disjunct
-                {
-                    new[]
-                    {
-                        (Minutes(60), Minutes(50))
-                    },
-                    new[]
-                    {
-                        (Minutes(100), Minutes(10)),
+                        (Minutes(60), Minutes(10)),
                         (Minutes(80), Minutes(10)),
-                        (Minutes(60), Minutes(10))
-                    },
-                    new[]
-                    {
-                        (Minutes(90), Minutes(10)),
-                        (Minutes(70), Minutes(10))
-                    }
-                };
-                yield return new[] //first first term applies to first second term. Second first term applies to second and third second term.
-                {
-                    new[]
-                    {
-                        (Minutes(90), Minutes(30)),
-                        (Minutes(60), Minutes(30))
-                    },
-                    new[]
-                    {
-                        (Minutes(110), Minutes(10)),
-                        (Minutes(80), Minutes(20)),
-                        (Minutes(60), Minutes(10))
-                    },
-                    new[]
-                    {
-                        (Minutes(100), Minutes(10)),
-                        (Minutes(70), Minutes(10))
+                        (Minutes(100), Minutes(10))
                     }
                 };
             }
         }
+
+        // public static IEnumerable<object[]> Union
+        // {
+        //     get
+        //     {
+        //         yield return new[] //Empty second term
+        //         {
+        //             new[] {(Hours(1), Minutes(30))},
+        //             Empty,
+        //             new[] {(Hours(1), Minutes(30))}
+        //         };
+        //         yield return new[] //Continous terms
+        //         {
+        //             new []{(Hours(1), Minutes(30))},
+        //             new []{(Minutes(30), Minutes(30))},
+        //             new []{(Minutes(30), Minutes(60))}
+        //         };
+        //         yield return new[] //terms intersect to the left
+        //         {
+        //             new []{(Hours(1), Minutes(30))},
+        //             new []{(Minutes(40), Minutes(30))},
+        //             new []{(Minutes(40), Minutes(50))}
+        //         };
+        //         yield return new[] //terms share open timespan
+        //         {
+        //             new []{(Hours(1), Minutes(30))},
+        //             new []{(Hours(1), Minutes(10))},
+        //             new []{(Minutes(60), Minutes(30))}
+        //         };
+        //         yield return new[] //second term is proper subset of the first
+        //         {
+        //             new []{(Hours(1), Minutes(30))},
+        //             new []{(Minutes(70), Minutes(10))},
+        //             new []{(Minutes(60), Minutes(30))}
+        //         };
+        //         yield return new[] // terms share end
+        //         {
+        //             new []{(Minutes(60), Minutes(30))},
+        //             new []{(Minutes(80), Minutes(10))},
+        //             new []{(Minutes(60), Minutes(30))}
+        //         };
+        //         yield return new[] // terms are continous
+        //         {
+        //             new []{(Minutes(60), Minutes(30))},
+        //             new []{(Minutes(90), Minutes(10))},
+        //             new []{(Minutes(60), Minutes(40))}
+        //         };
+        //         yield return new[] // terms are disjunct second term follows first
+        //         {
+        //             new []{(Minutes(60), Minutes(30))},
+        //             new []{(Minutes(100), Minutes(10))},
+        //             new []
+        //             {
+        //                 (Minutes(100), Minutes(10)),
+        //                 (Minutes(60), Minutes(30))
+        //             }
+        //         };
+        //         yield return new[] // first and second term map sequentially
+        //         {
+        //             new[]
+        //             {
+        //                 (Minutes(90), Minutes(20)),
+        //                 (Minutes(60), Minutes(20))
+        //             },
+        //             new[]
+        //             {
+        //                 (Minutes(100), Minutes(20)),
+        //                 (Minutes(70), Minutes(20))
+        //             },
+        //             new[]
+        //             {
+        //                 (Minutes(60), Minutes(60))
+        //             }
+        //         };
+        //         // yield return new[] // first first term apply to the last two second terms. first second term disjunct
+        //         // {
+        //         //     new[]
+        //         //     {
+        //         //         (Minutes(60), Minutes(20))
+        //         //     },
+        //         //     new[]
+        //         //     {
+        //         //         (Minutes(100), Minutes(10)),
+        //         //         (Minutes(80), Minutes(10)),
+        //         //         (Minutes(50), Minutes(10))
+        //         //     },
+        //         //     new[]
+        //         //     {
+        //         //         (Minutes(100), Minutes(10)),
+        //         //         (Minutes(50), Minutes(40))
+        //         //     }
+        //         // };
+        //         // yield return new[] //first first term applies to first second term. Second first term applies to second and third second term.
+        //         // {
+        //         //     new[]
+        //         //     {
+        //         //         (Minutes(90), Minutes(20)),
+        //         //         (Minutes(70), Minutes(20))
+        //         //     },
+        //         //     new[]
+        //         //     {
+        //         //         (Minutes(110), Minutes(10)),
+        //         //         (Minutes(80), Minutes(20)),
+        //         //         (Minutes(60), Minutes(10))
+        //         //     },
+        //         //     new[]
+        //         //     {
+        //         //         (Minutes(60), Minutes(60))
+        //         //     }
+        //         // };
+        //     }
+        // }
 
         public static IEnumerable<object[]> Empty_or_null
         {

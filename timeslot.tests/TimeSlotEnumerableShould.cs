@@ -240,21 +240,21 @@ namespace timeslot.tests
                 x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
-        // [Theory]
-        // [MemberData(nameof(Union))]
-        // public void Union_returns_correct_result(
-        //     (TimeSpan, TimeSpan)[] fsts,
-        //     (TimeSpan, TimeSpan)[] snds,
-        //     (TimeSpan, TimeSpan)[] exps
-        // )
-        // {
-        //     var result = Union(fsts, snds);
+        [Theory]
+        [MemberData(nameof(Union))]
+        public void Union_returns_correct_result(
+            (TimeSpan, TimeSpan)[] fsts,
+            (TimeSpan, TimeSpan)[] snds,
+            (TimeSpan, TimeSpan)[] exps
+        )
+        {
+            var result = Union(fsts, snds);
 
-        //     Assert.True(exps.Count() == result.Count(), ShowSlots(result));
-        //     Assert.All(
-        //         exps.Zip(result, Pairwise), 
-        //         x => Assert.Equal(Show(x.e), Show(x.r)));
-        // }
+            Assert.True(exps.Count() == result.Count(), ShowSlots(result));
+            Assert.All(
+                exps.Zip(result, Pairwise), 
+                x => Assert.Equal(Show(x.e), Show(x.r)));
+        }
 
         public static IEnumerable<object[]> Difference
         {
@@ -464,117 +464,166 @@ namespace timeslot.tests
             }
         }
 
-        // public static IEnumerable<object[]> Union
-        // {
-        //     get
-        //     {
-        //         yield return new[] //Empty second term
-        //         {
-        //             new[] {(Hours(1), Minutes(30))},
-        //             Empty,
-        //             new[] {(Hours(1), Minutes(30))}
-        //         };
-        //         yield return new[] //Continous terms
-        //         {
-        //             new []{(Hours(1), Minutes(30))},
-        //             new []{(Minutes(30), Minutes(30))},
-        //             new []{(Minutes(30), Minutes(60))}
-        //         };
-        //         yield return new[] //terms intersect to the left
-        //         {
-        //             new []{(Hours(1), Minutes(30))},
-        //             new []{(Minutes(40), Minutes(30))},
-        //             new []{(Minutes(40), Minutes(50))}
-        //         };
-        //         yield return new[] //terms share open timespan
-        //         {
-        //             new []{(Hours(1), Minutes(30))},
-        //             new []{(Hours(1), Minutes(10))},
-        //             new []{(Minutes(60), Minutes(30))}
-        //         };
-        //         yield return new[] //second term is proper subset of the first
-        //         {
-        //             new []{(Hours(1), Minutes(30))},
-        //             new []{(Minutes(70), Minutes(10))},
-        //             new []{(Minutes(60), Minutes(30))}
-        //         };
-        //         yield return new[] // terms share end
-        //         {
-        //             new []{(Minutes(60), Minutes(30))},
-        //             new []{(Minutes(80), Minutes(10))},
-        //             new []{(Minutes(60), Minutes(30))}
-        //         };
-        //         yield return new[] // terms are continous
-        //         {
-        //             new []{(Minutes(60), Minutes(30))},
-        //             new []{(Minutes(90), Minutes(10))},
-        //             new []{(Minutes(60), Minutes(40))}
-        //         };
-        //         yield return new[] // terms are disjunct second term follows first
-        //         {
-        //             new []{(Minutes(60), Minutes(30))},
-        //             new []{(Minutes(100), Minutes(10))},
-        //             new []
-        //             {
-        //                 (Minutes(100), Minutes(10)),
-        //                 (Minutes(60), Minutes(30))
-        //             }
-        //         };
-        //         yield return new[] // first and second term map sequentially
-        //         {
-        //             new[]
-        //             {
-        //                 (Minutes(90), Minutes(20)),
-        //                 (Minutes(60), Minutes(20))
-        //             },
-        //             new[]
-        //             {
-        //                 (Minutes(100), Minutes(20)),
-        //                 (Minutes(70), Minutes(20))
-        //             },
-        //             new[]
-        //             {
-        //                 (Minutes(60), Minutes(60))
-        //             }
-        //         };
-        //         // yield return new[] // first first term apply to the last two second terms. first second term disjunct
-        //         // {
-        //         //     new[]
-        //         //     {
-        //         //         (Minutes(60), Minutes(20))
-        //         //     },
-        //         //     new[]
-        //         //     {
-        //         //         (Minutes(100), Minutes(10)),
-        //         //         (Minutes(80), Minutes(10)),
-        //         //         (Minutes(50), Minutes(10))
-        //         //     },
-        //         //     new[]
-        //         //     {
-        //         //         (Minutes(100), Minutes(10)),
-        //         //         (Minutes(50), Minutes(40))
-        //         //     }
-        //         // };
-        //         // yield return new[] //first first term applies to first second term. Second first term applies to second and third second term.
-        //         // {
-        //         //     new[]
-        //         //     {
-        //         //         (Minutes(90), Minutes(20)),
-        //         //         (Minutes(70), Minutes(20))
-        //         //     },
-        //         //     new[]
-        //         //     {
-        //         //         (Minutes(110), Minutes(10)),
-        //         //         (Minutes(80), Minutes(20)),
-        //         //         (Minutes(60), Minutes(10))
-        //         //     },
-        //         //     new[]
-        //         //     {
-        //         //         (Minutes(60), Minutes(60))
-        //         //     }
-        //         // };
-        //     }
-        // }
+        public static IEnumerable<object[]> Union
+        {
+            get
+            {
+                yield return new[] {
+                    new[] { 
+                        (Minutes(60), Minutes(20))
+                    },
+                    Empty,
+                    new[] { 
+                        (Minutes(60), Minutes(20))
+                    },
+                };
+                yield return new[] {
+                    Empty,
+                    new[] { 
+                        (Minutes(60), Minutes(20))
+                    },
+                    new[] { 
+                        (Minutes(60), Minutes(20))
+                    },
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10)),
+                        (Minutes(100), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(120), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10)),
+                        (Minutes(100), Minutes(10)),
+                        (Minutes(120), Minutes(10))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(120), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10)),
+                        (Minutes(100), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10)),
+                        (Minutes(100), Minutes(10)),
+                        (Minutes(120), Minutes(10))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(100), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(80), Minutes(10)),
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10)),
+                        (Minutes(100), Minutes(10))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(20))
+                    },
+                    new [] {
+                        (Minutes(70), Minutes(20)),
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(30)),
+                        (Minutes(100), Minutes(20))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(20))
+                    },
+                    new [] {
+                        (Minutes(90), Minutes(20)),
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(90), Minutes(30))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(20))
+                    },
+                    new [] {
+                        (Minutes(70), Minutes(40)),
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(60))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(70), Minutes(40)),
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(20))
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(60))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(70), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(30))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(70))
+                    },
+                    new [] {
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10)),
+                        (Minutes(110), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(70))
+                    }
+                };
+                yield return new[] {
+                    new [] {
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(10)),
+                        (Minutes(120), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(70), Minutes(20)),
+                        (Minutes(110), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(60), Minutes(30)),
+                        (Minutes(100), Minutes(30))
+                    }
+                };
+            }
+        }
 
         public static IEnumerable<object[]> Empty_or_null
         {

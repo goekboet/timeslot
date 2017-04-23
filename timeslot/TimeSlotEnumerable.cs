@@ -48,27 +48,26 @@ namespace timeslot
             IEnumerable<(TimeSpan o, TimeSpan d)> snd)
         {
             Func<(TimeSpan o, TimeSpan), bool> fullyAppliedBy(
-                (TimeSpan o, TimeSpan) _s) => _r => End(_s) > _r.o;
+                (TimeSpan o, TimeSpan) _s) => _r => End(_s) > End(_r);
 
             if (fst == null || !fst.Any()) return Empty;
             if (snd == null || !snd.Any()) return fst;
 
             var s = snd.First();
-            var before = fst.TakeWhile(x => Overlap(x, s) == None);
+            var before = fst.TakeWhile(x => End(x) < s.o).ToArray();
             var applicable = fst
-                .SkipWhile(x => Overlap(x, s) == None)
+                .Skip(before.Count())
                 .TakeWhile(x => Overlap(x, s) != None);
             var r = applicable.SelectMany(x => Difference(x, s));
-            // var r = m.SelectMany(x => Difference(x, s));
 
             var computed = r.TakeWhile(fullyAppliedBy(s));
             var remainder = r.SkipWhile(fullyAppliedBy(s));
 
-            return before.Concat(computed
+            return before
+                .Concat(computed)
                 .Concat(Difference(
                     fst: remainder.Concat(fst.Skip(before.Count() + applicable.Count())),
-                    snd: snd.Skip(1))));
-            //return before.Concat(result);
+                    snd: snd.Skip(1)));
         }
 
         public static IEnumerable<(TimeSpan o, TimeSpan d)> Union(
@@ -77,24 +76,33 @@ namespace timeslot
         )
         {
             Func<(TimeSpan o, TimeSpan), bool> fullyAppliedBy(
-                (TimeSpan o, TimeSpan) _s) => _r => _s.o < _r.o;
+                (TimeSpan o, TimeSpan) _s) => _r => End(_s) > End(_r);
 
-            if (fst == null || !fst.Any()) return Empty;
+            if (fst == null || !fst.Any()) return snd;
             if (snd == null || !snd.Any()) return fst;
 
             var s = snd.First();
-            var f = fst.TakeWhile(x => End(x) >= s.o).FirstOrDefault();
-            var r = Union(f, s).Where(x => !x.Equals((Zero, Zero)));
+            var before = fst.TakeWhile(x => End(x) < s.o).ToArray();
+
+            var applicable = fst
+                .Skip(before.Count())
+                .TakeWhile(x => Overlap(x, s) != None);
+
+            var r = applicable.Any()
+                ? new[] { applicable.Aggregate(s, (acc, next) => Union(acc, next).Single()) }
+                : new[] { s };
 
             var computed = r.TakeWhile(fullyAppliedBy(s));
             var remainder = r.SkipWhile(fullyAppliedBy(s));
 
-            return computed
-                .Concat(Difference(
-                    fst: remainder.Concat(fst.Skip(f.Equals((Zero, Zero)) ? 0 : 1)),
-                    snd: snd.Skip(1)));
+            return before
+                .Concat(computed)
+                .Concat(
+                    Union(
+                        fst: remainder.Concat(fst.Skip(before.Count() + applicable.Count())),
+                        snd: snd.Skip(1)));
         }
-        
+
         /// <summary>
         /// The difference between the first timeslot and a second. 
         /// The result is the time considered open in first but not the second. 
@@ -146,7 +154,7 @@ namespace timeslot
                 case Intersect:
                     return new[] { (Min(fst.o, snd.o), Max(End(fst), End(snd)).Subtract(Min(fst.o, snd.o))) };
                 case ProperSubset:
-                    return new[] { (Min(fst.o, snd.o), Max(fst.d, snd.d))};
+                    return new[] { (Min(fst.o, snd.o), Max(fst.d, snd.d)) };
                 default:
                     throw new ArgumentOutOfRangeException();
             }

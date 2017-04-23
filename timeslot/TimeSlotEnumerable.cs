@@ -161,10 +161,29 @@ namespace timeslot
         }
 
         public static (TimeSpan o, TimeSpan d)[] Intersection(
-            (TimeSpan o, TimeSpan d) min,
-            (TimeSpan o, TimeSpan d) sub)
+            (TimeSpan o, TimeSpan d) fst,
+            (TimeSpan o, TimeSpan d) snd)
         {
-            return Empty;
+            (TimeSpan, TimeSpan)[] WithoutZero((TimeSpan, TimeSpan) [] spans) => 
+                spans.Where(IsNonZero).ToArray();
+
+            switch (Overlap(fst, snd))
+            {
+                case Equal:
+                    return new[] { fst };
+                case None:
+                    return Empty;
+                case Intersect:
+                    return End(fst) > End(snd)
+                        ? WithoutZero(new [] { (fst.o, End(snd).Subtract(fst.o))})
+                        : WithoutZero(new [] { (snd.o, End(fst).Subtract(snd.o))});
+                case ProperSubset:
+                    return fst.d < snd.d 
+                        ? new [] { fst }
+                        : new [] { snd }; 
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

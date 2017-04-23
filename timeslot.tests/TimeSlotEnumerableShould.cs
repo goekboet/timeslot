@@ -10,7 +10,7 @@ namespace timeslot.tests
     public class TimeSlotEnumerableShould
     {
         private static Func<(TimeSpan open, TimeSpan dur)> referenceSlot01h01h = () => (TimeSpan.FromHours(1), TimeSpan.FromHours(1));
-        private static Func<(TimeSpan, TimeSpan),(TimeSpan, TimeSpan), ((TimeSpan, TimeSpan) e,(TimeSpan, TimeSpan) r)> Pairwise = (e, r) => (e: e, r: r);
+        private static Func<(TimeSpan, TimeSpan), (TimeSpan, TimeSpan), ((TimeSpan, TimeSpan) e, (TimeSpan, TimeSpan) r)> Pairwise = (e, r) => (e: e, r: r);
 
         [Fact]
         public void Split_By_2()
@@ -48,8 +48,8 @@ namespace timeslot.tests
         {
             var firstTerm = (Minutes(30), Minutes(20));
             var secondTerm = (Minutes(60), Minutes(20));
-            var expect = new [] 
-            { 
+            var expect = new[]
+            {
                 (Minutes(30), Minutes(20)),
                 (Minutes(60), Minutes(20))
             };
@@ -69,7 +69,7 @@ namespace timeslot.tests
                 (Minutes(50), Minutes(20)),
                 (Minutes(110), Minutes(20)),
             };
-            var expected = new[]    
+            var expected = new[]
             {
                 (Minutes(70), Minutes(50)),
                 (Minutes(60), Minutes(50))
@@ -84,7 +84,7 @@ namespace timeslot.tests
         [Fact]
         public void Union_terms_intersect()
         {
-            var terms = new[] 
+            var terms = new[]
             {
                 (Minutes(50), Minutes(20)),
                 (Minutes(60), Minutes(20))
@@ -94,7 +94,7 @@ namespace timeslot.tests
             var results = Union(terms[0], terms[1])
                 .Concat(Union(terms[1], terms[0]))
                 .ToArray();
-            
+
             Assert.Equal(Show(results[0]), Show(results[1]));
             Assert.Equal(Show(expected), Show(results[0]));
         }
@@ -121,9 +121,9 @@ namespace timeslot.tests
         [Fact]
         public void Union_one_term_is_proper_subset_of_the_other()
         {
-            var terms = new[] 
+            var terms = new[]
             {
-                (Minutes(60), Minutes(30)), 
+                (Minutes(60), Minutes(30)),
                 (Minutes(70), Minutes(10))
             };
             var expected = (Minutes(60), Minutes(30));
@@ -131,7 +131,7 @@ namespace timeslot.tests
             var result = Union(terms[0], terms[1])
                     .Concat(Union(terms[1], terms[0]))
                     .ToArray();
-                
+
 
             Assert.Equal(Show(result[0]), Show(result[1]));
             Assert.Equal(Show(expected), Show(result[0]));
@@ -158,7 +158,7 @@ namespace timeslot.tests
         [Fact]
         public void Union_terms_are_equal()
         {
-            var terms = new[] 
+            var terms = new[]
             {
                 (Minutes(60), Minutes(60)),
                 (Minutes(60), Minutes(60))
@@ -196,7 +196,7 @@ namespace timeslot.tests
         {
             var firstTerm = (Minutes(60), Minutes(30));
             var secondTerm = (Minutes(80), Minutes(10));
-            var expected = new[] {(Minutes(60), Minutes(20))};
+            var expected = new[] { (Minutes(60), Minutes(20)) };
 
             var result = Difference(firstTerm, secondTerm);
 
@@ -208,7 +208,7 @@ namespace timeslot.tests
         {
             var firstTerm = (Minutes(60), Minutes(30));
             var secondTerm = (Minutes(60), Minutes(10));
-            var expected = new[] {(Minutes(70), Minutes(20))};
+            var expected = new[] { (Minutes(70), Minutes(20)) };
 
             var result = Difference(firstTerm, secondTerm);
 
@@ -252,7 +252,23 @@ namespace timeslot.tests
 
             Assert.True(exps.Count() == result.Count(), ShowSlots(result));
             Assert.All(
-                exps.Zip(result, Pairwise), 
+                result.Zip(exps, Pairwise),
+                x => Assert.Equal(Show(x.e), Show(x.r)));
+        }
+
+        [Theory]
+        [MemberData(nameof(IntersectionSingle))]
+        public void apply_intersection_correctly_on_single_terms(
+            (TimeSpan, TimeSpan) fst,
+            (TimeSpan, TimeSpan) snd,
+            (TimeSpan, TimeSpan)[] exp)
+        {
+            var result = Intersection(fst, snd)
+                .Concat(Intersection(snd, fst));
+
+            Assert.True(exp.Count() * 2 == result.Count(), ShowSlots(result));
+            Assert.All(
+                result.Zip(exp, Pairwise),
                 x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
@@ -268,17 +284,17 @@ namespace timeslot.tests
                 };
                 yield return new[] //fst before and disjunct from snd
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(70), Minutes(10)),
                         (Minutes(90), Minutes(10))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(110), Minutes(10))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(70), Minutes(10)),
@@ -287,33 +303,33 @@ namespace timeslot.tests
                 };
                 yield return new[] //fst after and disjunct from snd
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(110), Minutes(10))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(70), Minutes(10)),
                         (Minutes(90), Minutes(10))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(110), Minutes(10))
                     },
                 };
                 yield return new[] //fst preceded and followed by distinct snd
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(90), Minutes(10))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(70), Minutes(10)),
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(90), Minutes(10))
@@ -321,108 +337,108 @@ namespace timeslot.tests
                 };
                 yield return new[] //fst preceded and followed by distinct snd
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(20)),
                         (Minutes(80), Minutes(20))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(60), Minutes(30)),
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(90), Minutes(10))
                     }
                 };
-                yield return new[] 
+                yield return new[]
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(20)), //overlap snd from left
                         (Minutes(80), Minutes(10)), //proper subset of snd
                         (Minutes(100), Minutes(20)) //overlap snd from right
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(60), Minutes(50)),
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(110), Minutes(10))
                     }
                 };
-                yield return new[] 
+                yield return new[]
                 {
-                    new[] 
+                    new[]
                     {
-                        (Minutes(60), Minutes(30)), 
+                        (Minutes(60), Minutes(30)),
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(20)), //overlap fst from left
                         (Minutes(80), Minutes(20)) //overlap fst from right
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(70), Minutes(10)),
                     }
                 };
-                yield return new[] 
+                yield return new[]
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(80), Minutes(30)),
                         (Minutes(130), Minutes(10))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(70), Minutes(20)), //overlap fst from left
                         (Minutes(100), Minutes(20)) //overlap fst from right
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(90), Minutes(10)),
                         (Minutes(130), Minutes(10))
                     }
                 };
-                yield return new[] 
+                yield return new[]
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(20)),
                         (Minutes(80), Minutes(30)),
                         (Minutes(120), Minutes(20))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(60), Minutes(30)), //overlap fst from left
                         (Minutes(100), Minutes(30)) //overlap fst from right
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(90), Minutes(10)),
                         (Minutes(130), Minutes(10))
                     }
                 };
-                yield return new[] 
+                yield return new[]
                 {
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(70))
                     },
-                    new[] 
+                    new[]
                     {
-                        (Minutes(60), Minutes(10)), 
+                        (Minutes(60), Minutes(10)),
                         (Minutes(80), Minutes(10)),
                         (Minutes(100), Minutes(10))
                     },
-                    new[] 
+                    new[]
                     {
                         (Minutes(50), Minutes(10)),
                         (Minutes(70), Minutes(10)),
@@ -469,20 +485,20 @@ namespace timeslot.tests
             get
             {
                 yield return new[] {
-                    new[] { 
+                    new[] {
                         (Minutes(60), Minutes(20))
                     },
                     Empty,
-                    new[] { 
+                    new[] {
                         (Minutes(60), Minutes(20))
                     },
                 };
                 yield return new[] {
                     Empty,
-                    new[] { 
+                    new[] {
                         (Minutes(60), Minutes(20))
                     },
-                    new[] { 
+                    new[] {
                         (Minutes(60), Minutes(20))
                     },
                 };
@@ -621,6 +637,48 @@ namespace timeslot.tests
                         (Minutes(60), Minutes(30)),
                         (Minutes(100), Minutes(30))
                     }
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> IntersectionSingle
+        {
+            get
+            {
+                yield return new object[] {
+                    (Minutes(60), Minutes(10)),
+                    (Minutes(80), Minutes(10)),
+                    Empty
+                };
+                yield return new object[] {
+                    (Minutes(60), Minutes(10)),
+                    (Minutes(70), Minutes(10)),
+                    Empty
+                };
+                yield return new object[] {
+                    (Minutes(60), Minutes(20)),
+                    (Minutes(70), Minutes(20)),
+                    new [] {(Minutes(70), Minutes(10))}
+                };
+                yield return new object[] {
+                    (Minutes(60), Minutes(10)),
+                    (Minutes(60), Minutes(10)),
+                    new [] {(Minutes(60), Minutes(10))}
+                };
+                yield return new object[] {
+                    (Minutes(60), Minutes(20)),
+                    (Minutes(60), Minutes(10)),
+                    new [] {(Minutes(60), Minutes(10))}
+                };
+                yield return new object[] {
+                    (Minutes(60), Minutes(20)),
+                    (Minutes(70), Minutes(10)),
+                    new [] {(Minutes(70), Minutes(10))}
+                };
+                yield return new object[] {
+                    (Minutes(60), Minutes(30)),
+                    (Minutes(70), Minutes(10)),
+                    new [] {(Minutes(70), Minutes(10))}
                 };
             }
         }

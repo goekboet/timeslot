@@ -48,6 +48,8 @@ namespace timeslot
 
             return timeslot.Overlap.ProperSubset;
         }
+        public static bool IsZero((TimeSpan o, TimeSpan d) slot) => slot.d.Equals(Zero);
+        public static bool IsNonZero((TimeSpan, TimeSpan) slot) => !IsZero(slot);
         /// <summary>
         /// TimeSpan convenience
         /// </summary>

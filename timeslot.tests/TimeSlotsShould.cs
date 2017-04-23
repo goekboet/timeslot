@@ -47,6 +47,19 @@ namespace timeslot.tests
                     $"Should be partial was {Overlap(o, businesHours)}"));
         }
 
+        // Continus terms intersect because we want union over many to merge continous result,
+        // this classification makes that much simpler
+        [Fact]
+        public void Clasify_continous_spans_as_overlap_intersect()
+        {
+            var fst = (Minutes(60), Minutes(10));
+            var snd = (Minutes(70), Minutes(10));
+
+            var result = new[] { Overlap(fst, snd), Overlap(snd, fst)};
+
+            Assert.All(result, x => Assert.True(x.Equals(Intersect), $"was: {x}"));
+        }
+
         [Fact]
         public void Classify_overlap_as_propersubset()
         {

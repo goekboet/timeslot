@@ -12,6 +12,11 @@ namespace timeslot.tests
         private static Func<(TimeSpan open, TimeSpan dur)> referenceSlot01h01h = () => (TimeSpan.FromHours(1), TimeSpan.FromHours(1));
         private static Func<(TimeSpan, TimeSpan), (TimeSpan, TimeSpan), ((TimeSpan, TimeSpan) e, (TimeSpan, TimeSpan) r)> Pairwise = (e, r) => (e: e, r: r);
 
+        public static string ShowSlots(IEnumerable<(TimeSpan, TimeSpan)> slots)
+        {
+            return string.Join("\n", slots.Select(x => Show(x)));
+        }
+
         [Fact]
         public void Split_By_2()
         {
@@ -270,6 +275,26 @@ namespace timeslot.tests
             Assert.All(
                 result.Zip(exp, Pairwise),
                 x => Assert.Equal(Show(x.e), Show(x.r)));
+        }
+
+        [Theory]
+        [MemberData(nameof(InterSectionMany))]
+        public void apply_intersection_correctly_on_multiple_terms(
+            IEnumerable<(TimeSpan, TimeSpan)> fst,
+            IEnumerable<(TimeSpan, TimeSpan)> snd,
+            IEnumerable<(TimeSpan, TimeSpan)> exp,
+            bool reverseargs = true
+        )
+        {
+            var res = Intersection(fst, snd);
+
+            Assert.True(exp.Count() == res.Count(), ShowSlots(res));
+            Assert.All(
+                exp.Zip(res, Pairwise), 
+                x => Assert.Equal(Show(x.e), Show(x.r)));
+            
+            if(reverseargs)
+                apply_intersection_correctly_on_multiple_terms(snd, fst, exp, false);
         }
 
         public static IEnumerable<object[]> Difference
@@ -676,9 +701,105 @@ namespace timeslot.tests
                     new [] {(Minutes(70), Minutes(10))}
                 };
                 yield return new object[] {
+                    (Minutes(100), Minutes(20)),
+                    (Minutes(70), Minutes(40)),
+                    new [] {(Minutes(100), Minutes(10))}
+                };
+                yield return new object[] {
                     (Minutes(60), Minutes(30)),
                     (Minutes(70), Minutes(10)),
                     new [] {(Minutes(70), Minutes(10))}
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> InterSectionMany
+        {
+            get
+            {
+                yield return new object[] {
+                    Empty,
+                    Empty,
+                    Empty,
+                    false
+                };
+                yield return new object[] {
+                    Empty,
+                    new[] { (Minutes(60), Minutes(60)) },
+                    Empty
+                };
+                yield return new object[] {
+                    new[] { 
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10)) 
+                    },
+                    new[] { 
+                        (Minutes(100), Minutes(10))
+                    },
+                    Empty
+                };
+                yield return new object[] {
+                    new[] { 
+                        (Minutes(60), Minutes(10)),
+                        (Minutes(80), Minutes(10)) 
+                    },
+                    new[] { 
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10))
+                    },
+                    Empty
+                };
+                yield return new object[] {
+                    new[] { 
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(20)) 
+                    },
+                    new[] { 
+                        (Minutes(70), Minutes(20))
+                    },
+                    new[] {
+                        (Minutes(70), Minutes(10))
+                    }
+                };
+                yield return new object[] {
+                    new[] { 
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(20)) 
+                    },
+                    new[] { 
+                        (Minutes(90), Minutes(20))
+                    },
+                    new[] {
+                        (Minutes(100), Minutes(10))
+                    }
+                };
+                yield return new object[] {
+                    new[] { 
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(100), Minutes(20)) 
+                    },
+                    new[] { 
+                        (Minutes(70), Minutes(40))
+                    },
+                    new[] {
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(100), Minutes(10))
+                    }
+                };
+                yield return new object[] {
+                    new[] {
+                        (Minutes(60), Minutes(80))
+                    },
+                    new[] {
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10)),
+                        (Minutes(120), Minutes(10))
+                    },
+                    new [] {
+                        (Minutes(70), Minutes(10)),
+                        (Minutes(90), Minutes(10)),
+                        (Minutes(120), Minutes(10))
+                    }
                 };
             }
         }

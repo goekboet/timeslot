@@ -10,10 +10,7 @@ namespace timeslot
     {
         public static (TimeSpan o, TimeSpan d)[] Empty => new(TimeSpan, TimeSpan)[] { };
 
-        public static string ShowSlots(IEnumerable<(TimeSpan, TimeSpan)> slots)
-        {
-            return string.Join("\n", slots.Select(x => Show(x)));
-        }
+        
         /// <summary>
         /// Split a timeslot into equal parts.
         /// </summary>
@@ -103,6 +100,32 @@ namespace timeslot
                         snd: snd.Skip(1)));
         }
 
+        public static IEnumerable<(TimeSpan o, TimeSpan d)> Intersection(
+            IEnumerable<(TimeSpan o, TimeSpan d)> fst,
+            IEnumerable<(TimeSpan o, TimeSpan d)> snd)
+        {
+            Func<(TimeSpan o, TimeSpan), bool> fullyAppliedBy(
+                (TimeSpan o, TimeSpan) _s) => _r => End(_s) > End(_r);
+
+            if (fst == null || !fst.Any()) return Empty;
+            if (snd == null || !snd.Any()) return Empty;
+
+            var s = snd.First();
+            var before = fst.TakeWhile(x => End(x) < s.o).ToArray();
+            var applicable = fst
+                .Skip(before.Count())
+                .TakeWhile(x => Overlap(x, s) != None);
+            var r = applicable.SelectMany(x => Intersection(x, s));
+
+            var computed = r.TakeWhile(fullyAppliedBy(s));
+
+            return r
+                .Concat(
+                    Intersection(
+                        fst: fst.Skip(before.Count() + computed.Count()),
+                        snd: snd.Skip(1)));
+        }
+
         /// <summary>
         /// The difference between the first timeslot and a second. 
         /// The result is the time considered open in first but not the second. 
@@ -110,8 +133,8 @@ namespace timeslot
         /// </summary>
         /// <param name="o">open</param>
         /// <param name="d">duration</param>
-        /// <param name="m"></param>
-        /// <param name="d"></param>
+        /// <param name="fst">first term</param>
+        /// <param name="snd">second term</param>
         /// </summary>
 
         public static (TimeSpan o, TimeSpan d)[] Difference(

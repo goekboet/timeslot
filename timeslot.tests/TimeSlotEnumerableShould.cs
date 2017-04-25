@@ -18,23 +18,6 @@ namespace timeslot.tests
         }
 
         [Fact]
-        public void Split_By_2()
-        {
-            var hours = (Minutes(60), Minutes(60));
-            var result = Split(hours, 2);
-
-            var expected = new[] {
-                (Minutes(60), Minutes(30)),
-                (Minutes(90), Minutes(30))
-            };
-
-            Assert.Equal(result.Length, 2);
-            Assert.All(
-                expected.Zip(result, Pairwise),
-                x => Assert.Equal(Show(x.e), Show(x.r)));
-        }
-
-        [Fact]
         public void Subtract_distinct_terms()
         {
             var firstTerm = (Minutes(60), Minutes(60));
@@ -45,7 +28,9 @@ namespace timeslot.tests
                 (Minutes(130), Minutes(10))
             };
 
-            Assert.All(secondTerms, o => Assert.Equal(Show(firstTerm), Show(Difference(firstTerm, o).Single())));
+            Assert.All(
+                secondTerms, 
+                o => Assert.Equal(Show(firstTerm), Show(Difference(firstTerm, o).Single())));
         }
 
         [Fact]
@@ -62,7 +47,9 @@ namespace timeslot.tests
             var result = Union(firstTerm, secondTerm);
 
             Assert.Equal(expect.Count(), result.Count());
-            Assert.All(expect.Zip(result, Pairwise), x => Assert.Equal(Show(x.e), Show(x.r)));
+            Assert.All(
+                expect.Zip(result, Pairwise), 
+                x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
         [Fact]
@@ -83,7 +70,9 @@ namespace timeslot.tests
             var result = secondTerms.SelectMany(x => Difference(firstTerm, x));
 
             Assert.Equal(expected.Count(), result.Count());
-            Assert.All(expected.Zip(result, Pairwise), x => Assert.Equal(Show(x.e), Show(x.r)));
+            Assert.All(
+                expected.Zip(result, Pairwise), 
+                x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
         [Fact]

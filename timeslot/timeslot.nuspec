@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Timeslot</id>
+    <version>1.0.0-rc</version>
+    <title>Timeslot</title>
+    <authors>Erik Göök</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>
+    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
+    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Perform set operations like difference, union and intersection on list of timeslots, modeled as a pair of Timespans - one for the time past some reference point in time when the slot opens and the other for how long the slot stays open</description>
+    <releaseNotes>Initial version. Complete test suite and no known bugs</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>timeslot timespan set-operations</tags>
+  </metadata>
+</package>

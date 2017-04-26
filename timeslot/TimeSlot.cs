@@ -12,7 +12,7 @@ namespace timeslot
         /// </summary>
         Equal,
         /// <summary>
-        /// one timeslot follows the other
+        /// one timeslot is a proper subset of the other with regards to the time it is open
         /// </summary>
         ProperSubset,
         /// <summary>
@@ -71,7 +71,7 @@ namespace timeslot
         /// </summary>
         public static TimeSpan Hours(int h) => TimeSpan.FromHours(h);
         /// <summary>
-        /// Functional toString
+        /// Like toString
         /// </summary>
         /// <param name="o">open</param>
         /// <param name="d">duration</param>
@@ -84,30 +84,6 @@ namespace timeslot
             (TimeSpan o, TimeSpan d) span)
         {
             return $"o: {span.o.ToString()} d: {span.d.ToString()}";
-        }
-        /// <summary>
-        /// Move a given timespan forward
-        /// </summary>
-        /// <param name="o">open</param>
-        /// <param name="d">duration</param>
-        public static (TimeSpan o, TimeSpan d) MoveForward(
-            (TimeSpan o, TimeSpan d) slot,
-            TimeSpan span)
-        {
-            return (slot.o.Add(span), slot.d);
-        }
-
-        public static (TimeSpan o, TimeSpan d) MoveBack(
-            (TimeSpan o, TimeSpan d) slot,
-            TimeSpan span)
-        {
-            return (slot.o.Subtract(span), slot.d);
-        }
-
-        public static (TimeSpan o, TimeSpan d) TileForward(
-            (TimeSpan o, TimeSpan d) slot)
-        {
-            return MoveForward(slot, slot.d);
         }
     }
 }

@@ -1,1 +1,3 @@
 alias test='dotnet test timeslot.tests/timeslot.tests.csproj'
+alias pack='dotnet pack timeslot/timeslot.csproj -c release'
+alias push='nuget push timeslot/bin/release/timeslot.1.0.1-rc.nupkg $NUGET_API -Source https://api.nuget.org/v3/index.json'

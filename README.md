@@ -18,27 +18,31 @@ These functions will assume that the timeslots are sorted in descending order wi
 
 ```
 // Minutes(x) is defined as TimeSpan.FromMinutes(x)
-var first = new []  { (Minutes(60), Minutes(20)), (Minutes(90), Minutes(20))};
-var second = new [] { (Minutes(70), Minutes(20))};
+var first = new[] { (Minutes(60), Minutes(20)), (Minutes(90Minutes(20)) };
+var second = new[] { (Minutes(70), Minutes(30)) 
 
 // Show is a function (TimeSpan o, TimeSpan d) -> string 
-var diff = Difference(first, second).Select(Show); 
-var union = Union(first, second).Select(Show);                            }
+var diff = Difference(first, second).Select(Show);
+var union = Union(first, second).Select(Show);
 var intersect = Intersection(first, second).Select(Show);
 
-foreach (var slot in diff) Console.WriteLine(slot)
-// will print: 
+Console.WriteLine("Difference:");
+foreach (var slot in diff) Console.WriteLine(slot);
+
+Console.WriteLine("Union:");
+foreach (var slot in union) Console.WriteLine(slot);
+
+Console.WriteLine("Intersect:");
+foreach (var slot in intersect) Console.WriteLine(slot);
+
+// Will print:
+// Difference:
 // o: 01:00:00 d: 00:10:00
 // o: 01:40:00 d: 00:10:00
-
-foreach (var slot in union) Console.WriteLine(slot)
-// will print:
-// o: 01:50:00
-
-foreach (var slot in intersect) Console.WriteLine(slot)
-// will print :
+// Union:
+// o: 01:00:00 d: 00:50:00
+// Intersect:
 // o: 01:10:00 d: 00:10:00
 // o: 01:30:00 d: 00:10:00
-
 
 ```

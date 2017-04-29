@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard1.4</TargetFramework>
-    <id>Timeslot</id>
-    <version>1.0.0-rc</version>
-    <title>Timeslot</title>
-    <authors>erik.goek@gmail.com</authors>
-    <licenseUrl>MIT</licenseUrl>
-    <projectUrl>https://github.com/goekboet/timeslot</projectUrl>
+    <PackageId>timeslot</PackageId>
+    <Version>1.0.0-rc</Version>
+    <Title>Timeslot</Title>
+    <Authors>goekboet</Authors>
+    <PackageLicenseUrl>MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/goekboet/timeslot</PackageProjectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Perform set operations like difference, union and intersection on list of timeslots, modeled as a pair of Timespans - one for the time past some reference point in time when the slot opens and the other for how long the slot stays open</description>
-    <releaseNotes>Initial version. Complete test suite and no known bugs</releaseNotes>
-    <copyright>Copyright 2017</copyright>
-    <tags>timeslot timespan set-operations</tags>
+    <Description>Perform set operations like difference, union and intersection on list of timeslots, modeled as a pair of Timespans - one for the time past some reference point in time when the slot opens and the other for how long the slot stays open</Description>
+    <PackageReleaseNotes>Initial version. Complete test suite and no known bugs</PackageReleaseNotes>
+    <Copyright>Copyright 2017</Copyright>
+    <PackageTags>timeslot timespan set-operations</PackageTags>
+    <RepositoryUrl>https://github.com/goekboet/timeslot.git</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />

@@ -28,28 +28,35 @@ namespace timeslot
             IEnumerable<(TimeSpan o, TimeSpan d)> fst,
             IEnumerable<(TimeSpan o, TimeSpan d)> snd)
         {
-            Func<(TimeSpan o, TimeSpan), bool> fullyAppliedBy(
-                (TimeSpan o, TimeSpan) _s) => _r => End(_s) > End(_r);
+            var first = new Stack<(TimeSpan o, TimeSpan)>(fst ?? Empty);
+            var second = new Stack<(TimeSpan o, TimeSpan)>(snd ?? Empty);
+            var result = new Stack<(TimeSpan, TimeSpan)>();
 
-            if (fst == null || !fst.Any()) return Empty;
-            if (snd == null || !snd.Any()) return fst;
+            while (first.Count > 0)
+            {
+                var f = first.Pop();
 
-            var s = snd.First();
-            var before = fst.TakeWhile(x => End(x) < s.o).ToArray();
-            var applicable = fst
-                .Skip(before.Count())
-                .TakeWhile(x => Overlap(x, s) != None);
-            var r = applicable.SelectMany(x => Difference(x, s));
+                if (second.Count == 0) 
+                    result.Push(f);
+                else
+                {
+                    var s = second.Pop();
+                    var r = Difference(f, s);
+                    if (s.o < f.o) second.Push(s);
 
-            var computed = r.TakeWhile(fullyAppliedBy(s));
-            var remainder = r.SkipWhile(fullyAppliedBy(s));
+                    var computed = r.Where(x => x.o >= End(s));
+                    var remainder = r.Where(x => End(x) <= s.o);
 
-            return before
-                .Concat(computed)
-                .Concat(Difference(
-                    fst: remainder.Concat(fst.Skip(before.Count() + applicable.Count())),
-                    snd: snd.Skip(1)));
+                    if (computed.Any()) result.Push(computed.Single());
+                    if (remainder.Any()) first.Push(remainder.Single());
+                }
+            }
+
+            return result;
         }
+
+       
+
         /// <summary>
         /// Applies Union to a list of timeslots and another. 
         /// </summary>
@@ -211,7 +218,7 @@ namespace timeslot
             (TimeSpan o, TimeSpan d) fst,
             (TimeSpan o, TimeSpan d) snd)
         {
-            (TimeSpan, TimeSpan)[] WithoutZero((TimeSpan, TimeSpan) [] spans) => 
+            (TimeSpan, TimeSpan)[] WithoutZero((TimeSpan, TimeSpan)[] spans) =>
                 spans.Where(IsNonZero).ToArray();
 
             switch (Overlap(fst, snd))
@@ -222,12 +229,12 @@ namespace timeslot
                     return Empty;
                 case Intersect:
                     return End(fst) > End(snd)
-                        ? WithoutZero(new [] { (fst.o, End(snd).Subtract(fst.o))})
-                        : WithoutZero(new [] { (snd.o, End(fst).Subtract(snd.o))});
+                        ? WithoutZero(new[] { (fst.o, End(snd).Subtract(fst.o)) })
+                        : WithoutZero(new[] { (snd.o, End(fst).Subtract(snd.o)) });
                 case ProperSubset:
-                    return fst.d < snd.d 
-                        ? new [] { fst }
-                        : new [] { snd }; 
+                    return fst.d < snd.d
+                        ? new[] { fst }
+                        : new[] { snd };
                 default:
                     throw new ArgumentOutOfRangeException();
             }

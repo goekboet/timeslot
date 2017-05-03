@@ -28,9 +28,9 @@ namespace timeslot
             IEnumerable<(TimeSpan o, TimeSpan d)> fst,
             IEnumerable<(TimeSpan o, TimeSpan d)> snd)
         {
-            var first = new Stack<(TimeSpan o, TimeSpan)>(fst ?? Empty);
-            var second = new Stack<(TimeSpan o, TimeSpan)>(snd ?? Empty);
-            var result = new Stack<(TimeSpan, TimeSpan)>();
+            var first = _stack(fst);
+            var second = _stack(snd);
+            var result = _stack(Empty);
 
             while (first.Count > 0)
             {
@@ -55,7 +55,7 @@ namespace timeslot
             return result;
         }
 
-       
+        private static Stack<T> _stack<T>(IEnumerable<T> items) where T : struct => new Stack<T>(items ?? new T[] {});
 
         /// <summary>
         /// Applies Union to a list of timeslots and another. 
@@ -73,32 +73,42 @@ namespace timeslot
             IEnumerable<(TimeSpan o, TimeSpan d)> snd
         )
         {
-            Func<(TimeSpan o, TimeSpan), bool> fullyAppliedBy(
-                (TimeSpan o, TimeSpan) _s) => _r => End(_s) > End(_r);
+            var first = _stack(fst);
+            var second = _stack(snd);
+            var result = _stack(Empty);
 
-            if (fst == null || !fst.Any()) return snd;
-            if (snd == null || !snd.Any()) return fst;
+            while (first.Any())
+            {
+                var f = first.Pop();
 
-            var s = snd.First();
-            var before = fst.TakeWhile(x => End(x) < s.o).ToArray();
+                if (second.Any())
+                {
+                    var s = second.Pop();
+                    if (End(s) < f.o) 
+                    {
+                        result.Push(f);
+                        second.Push(s);
+                    }
+                    else if (End(f) < s.o)
+                    {
+                        result.Push(s);
+                        first.Push(f);
+                    }
+                    else
+                    {
+                        var r = Union(f, s).Single();
+                        if (r.o == f.o) first.Push(r);
+                        else second.Push(r);
+                    }
+                }
+                else
+                    result.Push(f);
+            }
 
-            var applicable = fst
-                .Skip(before.Count())
-                .TakeWhile(x => Overlap(x, s) != None);
+            while (second.Any())
+                result.Push(second.Pop());
 
-            var r = applicable.Any()
-                ? new[] { applicable.Aggregate(s, (acc, next) => Union(acc, next).Single()) }
-                : new[] { s };
-
-            var computed = r.TakeWhile(fullyAppliedBy(s));
-            var remainder = r.SkipWhile(fullyAppliedBy(s));
-
-            return before
-                .Concat(computed)
-                .Concat(
-                    Union(
-                        fst: remainder.Concat(fst.Skip(before.Count() + applicable.Count())),
-                        snd: snd.Skip(1)));
+            return result;
         }
         /// <summary>
         /// Applies Intersection to a list of timeslots and another.

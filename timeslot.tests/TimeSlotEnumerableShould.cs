@@ -246,7 +246,7 @@ namespace timeslot.tests
 
             Assert.True(exps.Count() == result.Count(), ShowSlots(result));
             Assert.All(
-                result.Zip(exps, Pairwise),
+                exps.Zip(result, Pairwise),
                 x => Assert.Equal(Show(x.e), Show(x.r)));
         }
 
@@ -510,10 +510,12 @@ namespace timeslot.tests
                 yield return new[] {
                     Empty,
                     new[] {
-                        (Minutes(60), Minutes(20))
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(90), Minutes(20))
                     },
                     new[] {
-                        (Minutes(60), Minutes(20))
+                        (Minutes(60), Minutes(20)),
+                        (Minutes(90), Minutes(20))
                     },
                 };
                 yield return new[] {

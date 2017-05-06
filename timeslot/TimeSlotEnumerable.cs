@@ -36,7 +36,7 @@ namespace timeslot
             {
                 var f = first.Pop();
 
-                if (second.Count == 0) 
+                if (second.Count == 0)
                     result.Push(f);
                 else
                 {
@@ -55,7 +55,7 @@ namespace timeslot
             return result;
         }
 
-        private static Stack<T> _stack<T>(IEnumerable<T> items) where T : struct => new Stack<T>(items ?? new T[] {});
+        private static Stack<T> _stack<T>(IEnumerable<T> items) where T : struct => new Stack<T>(items ?? new T[] { });
 
         /// <summary>
         /// Applies Union to a list of timeslots and another. 
@@ -84,7 +84,7 @@ namespace timeslot
                 if (second.Any())
                 {
                     var s = second.Pop();
-                    if (End(s) < f.o) 
+                    if (End(s) < f.o)
                     {
                         result.Push(f);
                         second.Push(s);
@@ -125,26 +125,28 @@ namespace timeslot
             IEnumerable<(TimeSpan o, TimeSpan d)> fst,
             IEnumerable<(TimeSpan o, TimeSpan d)> snd)
         {
-            Func<(TimeSpan o, TimeSpan), bool> fullyAppliedBy(
-                (TimeSpan o, TimeSpan) _s) => _r => End(_s) > End(_r);
+            var first = _stack(fst);
+            var second = _stack(snd);
+            var result = _stack(Empty);
 
-            if (fst == null || !fst.Any()) return Empty;
-            if (snd == null || !snd.Any()) return Empty;
+            while (first.Any())
+            {
+                var f = first.Pop();
+                if (second.Any())
+                {
+                    var s = second.Pop();
+                    if (s.o < f.o) second.Push(s);
+                    if (f.o < s.o) first.Push(f);
+                    var r = Intersection(f, s);
+                    if (r.Any())
+                    {
+                        var i = r.Single();
+                        result.Push(i);
+                    }
+                }
+            }
 
-            var s = snd.First();
-            var before = fst.TakeWhile(x => End(x) < s.o).ToArray();
-            var applicable = fst
-                .Skip(before.Count())
-                .TakeWhile(x => Overlap(x, s) != None);
-            var r = applicable.SelectMany(x => Intersection(x, s));
-
-            var computed = r.TakeWhile(fullyAppliedBy(s));
-
-            return r
-                .Concat(
-                    Intersection(
-                        fst: fst.Skip(before.Count() + computed.Count()),
-                        snd: snd.Skip(1)));
+            return result;
         }
 
         /// <summary>

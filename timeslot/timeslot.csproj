@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.4</TargetFramework>
     <PackageId>timeslot</PackageId>
-    <Version>1.0.0</Version>
+    <PackageVersion>1.0.1</PackageVersion>
     <Title>Timeslot</Title>
     <Authors>goekboet</Authors>
     <PackageLicenseUrl>MIT</PackageLicenseUrl>
